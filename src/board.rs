@@ -18,14 +18,14 @@ impl Board {
     }
 
     pub fn get_piece(&mut self, index: u8) -> Option<(Color, Piece)> {
-        let color = if (self.color_bb[Color::White as usize] >> (63 - index)) & 1 == 1 {
+        let color = if (self.color_bb[Color::White as usize] >> index) & 1 == 1 {
             Color::White
         } else {
             Color::Black
         };
 
         for piece in Piece::iter() {
-            if (self.piece_bb[piece as usize] >> (63 - index)) & 1 == 1 {
+            if (self.piece_bb[piece as usize] >> index) & 1 == 1 {
                 return Some((color, piece));
             }
         }
@@ -34,13 +34,13 @@ impl Board {
     }
 
     pub fn set_piece(&mut self, color: Color, piece: Piece, index: u8) {
-        let setter = (1 as u64) << (63 - index);
+        let setter = (1 as u64) << index;
         self.color_bb[color as usize] |= setter;
         self.piece_bb[piece as usize] |= setter;
     }
 
     pub fn unset_piece(&mut self, color: Color, piece: Piece, index: u8) {
-        let setter = (1 as u64) << (63 - index);
+        let setter = (1 as u64) << index;
         self.color_bb[color as usize] ^= setter;
         self.piece_bb[piece as usize] ^= setter;
     }
@@ -58,21 +58,16 @@ impl Board {
     }
 
     pub fn print_board(&mut self) {
-        for i in 0..64 {
-            if i != 0 && i % 8 == 0 {
-                print!("\n")
+        for row in (0..8).rev() {
+            for col in 0..8 {
+                if let Some((color, piece)) = self.get_piece(row * 8 + col) {
+                    print!("{} ", piece_to_str(color, piece));
+                } else {
+                    print!(". ");
+                }
             }
-
-            if let Some((color, piece)) = self.get_piece(i) {
-                let piece_rep = piece_to_str(color, piece);
-                print!("{}", piece_rep);
-            } else {
-                print!(".")
-            }
-
-            print!(" ");
+            println!();
         }
-        print!("\n");
     }
 }
 
