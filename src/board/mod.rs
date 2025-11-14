@@ -78,7 +78,10 @@ impl Board {
     }
 
     pub fn print_board(&mut self) {
+        let files = ('A'..='H').collect::<String>().replace("", " ");
+        println!(" {}", files);
         for row in (0..8).rev() {
+            print!("{} ", (('1' as u8) + row) as char);
             for col in 0..8 {
                 if let Some((color, piece)) = self.get_piece_index(row * 8 + col) {
                     print!("{} ", piece_to_str(color, piece));
