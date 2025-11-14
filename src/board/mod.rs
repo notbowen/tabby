@@ -2,7 +2,12 @@
 
 use strum::IntoEnumIterator;
 
-use crate::pieces::{Bitboard, Color, Piece, piece_to_str};
+pub mod square;
+
+use crate::{
+    board::square::Square,
+    pieces::{Bitboard, Color, Piece, piece_to_str},
+};
 
 pub struct Board {
     color_bb: [Bitboard; 2],
@@ -17,7 +22,12 @@ impl Board {
         }
     }
 
-    pub fn get_piece(&mut self, index: u8) -> Option<(Color, Piece)> {
+    pub fn get_piece(&mut self, square: Square) -> Option<(Color, Piece)> {
+        let index = square.to_index();
+        self.get_piece_index(index)
+    }
+
+    pub fn get_piece_index(&mut self, index: u8) -> Option<(Color, Piece)> {
         let color = if (self.color_bb[Color::White as usize] >> index) & 1 == 1 {
             Color::White
         } else {
@@ -33,13 +43,23 @@ impl Board {
         None
     }
 
-    pub fn set_piece(&mut self, color: Color, piece: Piece, index: u8) {
+    pub fn set_piece(&mut self, color: Color, piece: Piece, square: Square) {
+        let index = square.to_index();
+        self.set_piece_index(color, piece, index)
+    }
+
+    pub fn set_piece_index(&mut self, color: Color, piece: Piece, index: u8) {
         let setter = (1 as u64) << index;
         self.color_bb[color as usize] |= setter;
         self.piece_bb[piece as usize] |= setter;
     }
 
-    pub fn unset_piece(&mut self, color: Color, piece: Piece, index: u8) {
+    pub fn unset_piece(&mut self, color: Color, piece: Piece, square: Square) {
+        let index = square.to_index();
+        self.unset_piece_index(color, piece, index)
+    }
+
+    pub fn unset_piece_index(&mut self, color: Color, piece: Piece, index: u8) {
         let setter = (1 as u64) << index;
         self.color_bb[color as usize] ^= setter;
         self.piece_bb[piece as usize] ^= setter;
@@ -60,7 +80,7 @@ impl Board {
     pub fn print_board(&mut self) {
         for row in (0..8).rev() {
             for col in 0..8 {
-                if let Some((color, piece)) = self.get_piece(row * 8 + col) {
+                if let Some((color, piece)) = self.get_piece_index(row * 8 + col) {
                     print!("{} ", piece_to_str(color, piece));
                 } else {
                     print!(". ");
