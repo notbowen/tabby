@@ -33,5 +33,6 @@ pub fn piece_to_str(color: Color, piece: Piece) -> String {
         (Color::Black, Piece::Rook) => "",
         (Color::Black, Piece::Queen) => "",
         (Color::Black, Piece::King) => "",
-    }.into()
+    }
+    .into()
 }
