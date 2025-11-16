@@ -17,7 +17,7 @@ pub struct Board {
     piece_bb: [Bitboard; 6],
 
     current_side: Color,
-    castling: Option<CastlingRights>,
+    castling: u8,
     en_passant: Option<Square>,
 }
 
@@ -28,13 +28,17 @@ impl Board {
             piece_bb: [0; 6],
 
             current_side: Color::White,
-            castling: None,
+            castling: 0,
             en_passant: None,
         }
     }
 
     pub fn set_side(&mut self, color: Color) {
         self.current_side = color;
+    }
+
+    pub fn set_castling(&mut self, castling: CastlingRights) {
+        self.castling |= castling as u8;
     }
 
     pub fn get_piece(&mut self, square: Square) -> Option<(Color, Piece)> {

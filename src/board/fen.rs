@@ -1,5 +1,5 @@
 use crate::{
-    board::Board,
+    board::{Board, castling::CastlingRights},
     errors::FenParseError,
     pieces::{Color, str_to_colored_piece},
 };
@@ -15,6 +15,7 @@ impl Board {
         let mut board = Board::new();
         parse_board_fen(&mut board, parts[0])?;
         parse_color(&mut board, parts[1])?;
+        parse_castling_rights(&mut board, parts[2])?;
 
         Ok(board)
     }
@@ -49,5 +50,28 @@ fn parse_color(board: &mut Board, color: &str) -> Result<(), FenParseError> {
     };
 
     board.set_side(c);
+    Ok(())
+}
+
+fn parse_castling_rights(board: &mut Board, castling: &str) -> Result<(), FenParseError> {
+    if castling.len() > 4 {
+        return Err(FenParseError("Castling rights is too long!".into()));
+    }
+
+    for c in castling.chars() {
+        match c {
+            'k' => board.set_castling(CastlingRights::BlackKing),
+            'q' => board.set_castling(CastlingRights::BlackQueen),
+            'K' => board.set_castling(CastlingRights::WhiteKing),
+            'Q' => board.set_castling(CastlingRights::WhiteQueen),
+            _ => {
+                return Err(FenParseError(format!(
+                    "Invalid castling rights: {}",
+                    castling
+                )));
+            }
+        }
+    }
+
     Ok(())
 }
