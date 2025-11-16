@@ -1,14 +1,15 @@
-use crate::{
-    board::{Board, square::Square},
-    pieces::{Color, Piece},
-};
+use std::error::Error;
+
+use crate::board::Board;
 
 mod board;
+mod errors;
 mod pieces;
 
-fn main() {
-    let mut b = Board::new();
-    b.set_piece(Color::White, Piece::Pawn, Square::A1);
-    b.set_piece(Color::Black, Piece::King, Square::H7);
-    b.print_board();
+fn main() -> Result<(), Box<dyn Error>> {
+    let mut b = Board::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")?;
+    // b.show_bitboards();
+    b.debug_board();
+
+    Ok(())
 }

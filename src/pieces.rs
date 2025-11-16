@@ -18,7 +18,34 @@ pub enum Piece {
     King,
 }
 
-pub fn piece_to_str(color: Color, piece: Piece) -> String {
+pub fn str_to_piece(s: char) -> Option<Piece> {
+    match s.to_ascii_lowercase() {
+        'p' => Some(Piece::Pawn),
+        'n' => Some(Piece::Knight),
+        'b' => Some(Piece::Bishop),
+        'r' => Some(Piece::Rook),
+        'q' => Some(Piece::Queen),
+        'k' => Some(Piece::King),
+        _ => None,
+    }
+}
+
+pub fn str_to_colored_piece(s: char) -> Option<(Color, Piece)> {
+    let piece = match str_to_piece(s) {
+        Some(p) => p,
+        None => return None,
+    };
+
+    let color = if s.is_uppercase() {
+        Color::White
+    } else {
+        Color::Black
+    };
+
+    Some((color, piece))
+}
+
+pub fn piece_to_art(color: Color, piece: Piece) -> String {
     match (color, piece) {
         (Color::White, Piece::Pawn) => "󰡙",
         (Color::White, Piece::Knight) => "󰡘",

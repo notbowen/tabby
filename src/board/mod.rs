@@ -1,17 +1,22 @@
 #![allow(dead_code)]
 
-use strum::IntoEnumIterator;
-
+pub mod castling;
+pub mod fen;
 pub mod square;
 
+use strum::IntoEnumIterator;
+
 use crate::{
-    board::square::Square,
-    pieces::{Bitboard, Color, Piece, piece_to_str},
+    board::{castling::CastlingRights, square::Square},
+    pieces::{Bitboard, Color, Piece, piece_to_art},
 };
 
+#[derive(Debug)]
 pub struct Board {
     color_bb: [Bitboard; 2],
     piece_bb: [Bitboard; 6],
+    castling: Option<CastlingRights>,
+    en_passant: Option<Square>,
 }
 
 impl Board {
@@ -19,6 +24,8 @@ impl Board {
         Board {
             color_bb: [0; 2],
             piece_bb: [0; 6],
+            castling: None,
+            en_passant: None,
         }
     }
 
@@ -84,13 +91,18 @@ impl Board {
             print!("{} ", (('1' as u8) + row) as char);
             for col in 0..8 {
                 if let Some((color, piece)) = self.get_piece_index(row * 8 + col) {
-                    print!("{} ", piece_to_str(color, piece));
+                    print!("{} ", piece_to_art(color, piece));
                 } else {
                     print!(". ");
                 }
             }
             println!();
         }
+    }
+
+    pub fn debug_board(&mut self) {
+        println!("{:#?}\n", &self);
+        self.print_board();
     }
 }
 
