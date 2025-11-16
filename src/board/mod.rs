@@ -15,6 +15,8 @@ use crate::{
 pub struct Board {
     color_bb: [Bitboard; 2],
     piece_bb: [Bitboard; 6],
+
+    current_side: Color,
     castling: Option<CastlingRights>,
     en_passant: Option<Square>,
 }
@@ -24,9 +26,15 @@ impl Board {
         Board {
             color_bb: [0; 2],
             piece_bb: [0; 6],
+
+            current_side: Color::White,
             castling: None,
             en_passant: None,
         }
+    }
+
+    pub fn set_side(&mut self, color: Color) {
+        self.current_side = color;
     }
 
     pub fn get_piece(&mut self, square: Square) -> Option<(Color, Piece)> {

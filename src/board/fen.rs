@@ -1,4 +1,8 @@
-use crate::{board::Board, errors::FenParseError, pieces::str_to_colored_piece};
+use crate::{
+    board::Board,
+    errors::FenParseError,
+    pieces::{Color, str_to_colored_piece},
+};
 
 impl Board {
     pub fn from_fen(fen: &str) -> Result<Board, FenParseError> {
@@ -10,6 +14,7 @@ impl Board {
 
         let mut board = Board::new();
         parse_board_fen(&mut board, parts[0])?;
+        parse_color(&mut board, parts[1])?;
 
         Ok(board)
     }
@@ -33,5 +38,16 @@ fn parse_board_fen(board: &mut Board, fen: &str) -> Result<(), FenParseError> {
         }
     }
 
+    Ok(())
+}
+
+fn parse_color(board: &mut Board, color: &str) -> Result<(), FenParseError> {
+    let c = match color {
+        "w" => Color::White,
+        "b" => Color::Black,
+        _ => return Err(FenParseError(format!("Invalid color {}", color))),
+    };
+
+    board.set_side(c);
     Ok(())
 }
