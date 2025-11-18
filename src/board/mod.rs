@@ -41,6 +41,10 @@ impl Board {
         self.castling |= castling as u8;
     }
 
+    pub fn set_en_passant(&mut self, square: Option<Square>) {
+        self.en_passant = square;
+    }
+
     pub fn get_piece(&mut self, square: Square) -> Option<(Color, Piece)> {
         let index = square.to_index();
         self.get_piece_index(index)

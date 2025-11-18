@@ -1,5 +1,7 @@
+use std::str::FromStr;
+
 use crate::{
-    board::{Board, castling::CastlingRights},
+    board::{Board, castling::CastlingRights, square::Square},
     errors::FenParseError,
     pieces::{Color, str_to_colored_piece},
 };
@@ -16,6 +18,7 @@ impl Board {
         parse_board_fen(&mut board, parts[0])?;
         parse_color(&mut board, parts[1])?;
         parse_castling_rights(&mut board, parts[2])?;
+        parse_en_passant(&mut board, parts[3])?;
 
         Ok(board)
     }
@@ -73,5 +76,19 @@ fn parse_castling_rights(board: &mut Board, castling: &str) -> Result<(), FenPar
         }
     }
 
+    Ok(())
+}
+
+fn parse_en_passant(board: &mut Board, square_str: &str) -> Result<(), FenParseError> {
+    let square = if square_str != "-" {
+        Some(
+            Square::from_str(square_str)
+                .map_err(|_| FenParseError(format!("Invalid en passant square: {}", square_str)))?,
+        )
+    } else {
+        None
+    };
+
+    board.set_en_passant(square);
     Ok(())
 }
