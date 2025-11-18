@@ -7,7 +7,7 @@ pub mod square;
 use strum::IntoEnumIterator;
 
 use crate::{
-    board::{castling::CastlingRights, square::Square},
+    board::square::Square,
     pieces::{Bitboard, Color, Piece, piece_to_art},
 };
 
@@ -16,9 +16,12 @@ pub struct Board {
     color_bb: [Bitboard; 2],
     piece_bb: [Bitboard; 6],
 
-    current_side: Color,
-    castling: u8,
-    en_passant: Option<Square>,
+    pub current_side: Color,
+    pub castling: u8,
+    pub en_passant: Option<Square>,
+
+    pub halfmove: u8,
+    pub fullmove: u8,
 }
 
 impl Board {
@@ -30,19 +33,10 @@ impl Board {
             current_side: Color::White,
             castling: 0,
             en_passant: None,
+
+            halfmove: 0,
+            fullmove: 1,
         }
-    }
-
-    pub fn set_side(&mut self, color: Color) {
-        self.current_side = color;
-    }
-
-    pub fn set_castling(&mut self, castling: CastlingRights) {
-        self.castling |= castling as u8;
-    }
-
-    pub fn set_en_passant(&mut self, square: Option<Square>) {
-        self.en_passant = square;
     }
 
     pub fn get_piece(&mut self, square: Square) -> Option<(Color, Piece)> {

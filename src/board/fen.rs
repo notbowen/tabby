@@ -52,7 +52,7 @@ fn parse_color(board: &mut Board, color: &str) -> Result<(), FenParseError> {
         _ => return Err(FenParseError(format!("Invalid color {}", color))),
     };
 
-    board.set_side(c);
+    board.current_side = c;
     Ok(())
 }
 
@@ -63,10 +63,10 @@ fn parse_castling_rights(board: &mut Board, castling: &str) -> Result<(), FenPar
 
     for c in castling.chars() {
         match c {
-            'k' => board.set_castling(CastlingRights::BlackKing),
-            'q' => board.set_castling(CastlingRights::BlackQueen),
-            'K' => board.set_castling(CastlingRights::WhiteKing),
-            'Q' => board.set_castling(CastlingRights::WhiteQueen),
+            'k' => board.castling |= CastlingRights::BlackKing as u8,
+            'q' => board.castling |= CastlingRights::BlackQueen as u8,
+            'K' => board.castling |= CastlingRights::WhiteKing as u8,
+            'Q' => board.castling |= CastlingRights::WhiteQueen as u8,
             _ => {
                 return Err(FenParseError(format!(
                     "Invalid castling rights: {}",
@@ -89,6 +89,24 @@ fn parse_en_passant(board: &mut Board, square_str: &str) -> Result<(), FenParseE
         None
     };
 
-    board.set_en_passant(square);
+    board.en_passant = square;
+    Ok(())
+}
+
+fn parse_halfmove(board: &mut Board, halfmove_str: &str) -> Result<(), FenParseError> {
+    let halfmove = halfmove_str
+        .parse::<u8>()
+        .map_err(|_| FenParseError(format!("Invalid halfmove: {}", halfmove_str)))?;
+
+    board.halfmove = halfmove;
+    Ok(())
+}
+
+fn parse_fullmove(board: &mut Board, fullmove_str: &str) -> Result<(), FenParseError> {
+    let fullmove = fullmove_str
+        .parse::<u8>()
+        .map_err(|_| FenParseError(format!("Invalid fullmove: {}", fullmove_str)))?;
+
+    board.fullmove = fullmove;
     Ok(())
 }
