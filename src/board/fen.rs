@@ -61,6 +61,10 @@ fn parse_castling_rights(board: &mut Board, castling: &str) -> Result<(), FenPar
         return Err(FenParseError("Castling rights is too long!".into()));
     }
 
+    if castling == "-" {
+        return Ok(())
+    }
+
     for c in castling.chars() {
         match c {
             'k' => board.castling |= CastlingRights::BlackKing as u8,
