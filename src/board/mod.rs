@@ -13,8 +13,8 @@ use crate::{
 
 #[derive(Debug)]
 pub struct Board {
-    color_bb: [Bitboard; 2],
-    piece_bb: [Bitboard; 6],
+    pub color_bb: [Bitboard; 2],
+    pub piece_bb: [Bitboard; 6],
 
     pub current_side: Color,
     pub castling: u8,
@@ -45,14 +45,14 @@ impl Board {
     }
 
     pub fn get_piece_index(&mut self, index: u8) -> Option<(Color, Piece)> {
-        let color = if (self.color_bb[Color::White as usize] >> index) & 1 == 1 {
+        let color = if (self.color_bb[Color::White] >> index) & 1 == 1 {
             Color::White
         } else {
             Color::Black
         };
 
         for piece in Piece::iter() {
-            if (self.piece_bb[piece as usize] >> index) & 1 == 1 {
+            if (self.piece_bb[piece] >> index) & 1 == 1 {
                 return Some((color, piece));
             }
         }
@@ -67,8 +67,8 @@ impl Board {
 
     pub fn set_piece_index(&mut self, color: Color, piece: Piece, index: u8) {
         let setter = (1 as u64) << index;
-        self.color_bb[color as usize] |= setter;
-        self.piece_bb[piece as usize] |= setter;
+        self.color_bb[color] |= setter;
+        self.piece_bb[piece] |= setter;
     }
 
     pub fn unset_piece(&mut self, color: Color, piece: Piece, square: Square) {
@@ -78,19 +78,19 @@ impl Board {
 
     pub fn unset_piece_index(&mut self, color: Color, piece: Piece, index: u8) {
         let setter = (1 as u64) << index;
-        self.color_bb[color as usize] ^= setter;
-        self.piece_bb[piece as usize] ^= setter;
+        self.color_bb[color] ^= setter;
+        self.piece_bb[piece] ^= setter;
     }
 
     pub fn show_bitboards(&self) {
         for color in Color::iter() {
             println!("{:?}\n", color);
-            println!("{}\n\n", format_bitboard(self.color_bb[color as usize]));
+            println!("{}\n\n", format_bitboard(self.color_bb[color]));
         }
 
         for piece in Piece::iter() {
             println!("{:?}\n", piece);
-            println!("{}\n\n", format_bitboard(self.piece_bb[piece as usize]));
+            println!("{}\n\n", format_bitboard(self.piece_bb[piece]));
         }
     }
 

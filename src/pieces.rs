@@ -1,3 +1,7 @@
+use std::{
+    ops::{Index, IndexMut},
+    slice::SliceIndex,
+};
 use strum_macros::EnumIter;
 
 pub type Bitboard = u64;
@@ -8,6 +12,20 @@ pub enum Color {
     Black = 1,
 }
 
+impl<T> Index<Color> for [T] {
+    type Output = T;
+
+    fn index(&self, index: Color) -> &Self::Output {
+        &self[index as usize]
+    }
+}
+
+impl<T> IndexMut<Color> for [T] {
+    fn index_mut(&mut self, index: Color) -> &mut Self::Output {
+        &mut self[index as usize]
+    }
+}
+
 #[derive(Clone, Copy, Debug, EnumIter)]
 pub enum Piece {
     Pawn = 0,
@@ -16,6 +34,20 @@ pub enum Piece {
     Rook,
     Queen,
     King,
+}
+
+impl<T> Index<Piece> for [T] {
+    type Output = T;
+
+    fn index(&self, index: Piece) -> &Self::Output {
+        &self[index as usize]
+    }
+}
+
+impl<T> IndexMut<Piece> for [T] {
+    fn index_mut(&mut self, index: Piece) -> &mut Self::Output {
+        &mut self[index as usize]
+    }
 }
 
 pub fn str_to_piece(s: char) -> Option<Piece> {
