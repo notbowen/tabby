@@ -62,7 +62,7 @@ fn parse_castling_rights(board: &mut Board, castling: &str) -> Result<(), FenPar
     }
 
     if castling == "-" {
-        return Ok(())
+        return Ok(());
     }
 
     for c in castling.chars() {
