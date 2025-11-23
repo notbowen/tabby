@@ -1,7 +1,4 @@
-use std::{
-    ops::{Index, IndexMut},
-    slice::SliceIndex,
-};
+use std::ops::{Index, IndexMut};
 use strum_macros::EnumIter;
 
 pub type Bitboard = u64;
