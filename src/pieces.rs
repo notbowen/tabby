@@ -1,8 +1,6 @@
 use std::ops::{Index, IndexMut};
 use strum_macros::EnumIter;
 
-pub type Bitboard = u64;
-
 #[derive(Debug, EnumIter)]
 pub enum Color {
     White = 0,

@@ -1,30 +1,32 @@
 use std::str::FromStr;
 
 use crate::{
-    board::{Board, castling::CastlingRights, square::Square},
     errors::FenParseError,
     pieces::{Color, str_to_colored_piece},
+    state::{GameState, castling::CastlingRights, square::Square},
 };
 
-impl Board {
-    pub fn from_fen(fen: &str) -> Result<Board, FenParseError> {
+impl GameState {
+    pub fn from_fen(fen: &str) -> Result<GameState, FenParseError> {
         let parts = fen.split(' ').collect::<Vec<&str>>();
 
         if parts.len() != 6 {
             return Err(FenParseError("FEN parts != 6".into()));
         }
 
-        let mut board = Board::new();
+        let mut board = GameState::new();
         parse_board_fen(&mut board, parts[0])?;
         parse_color(&mut board, parts[1])?;
         parse_castling_rights(&mut board, parts[2])?;
         parse_en_passant(&mut board, parts[3])?;
+        parse_halfmove(&mut board, parts[4])?;
+        parse_fullmove(&mut board, parts[5])?;
 
         Ok(board)
     }
 }
 
-fn parse_board_fen(board: &mut Board, fen: &str) -> Result<(), FenParseError> {
+fn parse_board_fen(board: &mut GameState, fen: &str) -> Result<(), FenParseError> {
     let mut idx = 64;
     for c in fen.chars() {
         idx -= 1;
@@ -45,7 +47,7 @@ fn parse_board_fen(board: &mut Board, fen: &str) -> Result<(), FenParseError> {
     Ok(())
 }
 
-fn parse_color(board: &mut Board, color: &str) -> Result<(), FenParseError> {
+fn parse_color(board: &mut GameState, color: &str) -> Result<(), FenParseError> {
     let c = match color {
         "w" => Color::White,
         "b" => Color::Black,
@@ -56,7 +58,7 @@ fn parse_color(board: &mut Board, color: &str) -> Result<(), FenParseError> {
     Ok(())
 }
 
-fn parse_castling_rights(board: &mut Board, castling: &str) -> Result<(), FenParseError> {
+fn parse_castling_rights(board: &mut GameState, castling: &str) -> Result<(), FenParseError> {
     if castling.len() > 4 {
         return Err(FenParseError("Castling rights is too long!".into()));
     }
@@ -83,7 +85,7 @@ fn parse_castling_rights(board: &mut Board, castling: &str) -> Result<(), FenPar
     Ok(())
 }
 
-fn parse_en_passant(board: &mut Board, square_str: &str) -> Result<(), FenParseError> {
+fn parse_en_passant(board: &mut GameState, square_str: &str) -> Result<(), FenParseError> {
     let square = if square_str != "-" {
         Some(
             Square::from_str(square_str)
@@ -97,7 +99,7 @@ fn parse_en_passant(board: &mut Board, square_str: &str) -> Result<(), FenParseE
     Ok(())
 }
 
-fn parse_halfmove(board: &mut Board, halfmove_str: &str) -> Result<(), FenParseError> {
+fn parse_halfmove(board: &mut GameState, halfmove_str: &str) -> Result<(), FenParseError> {
     let halfmove = halfmove_str
         .parse::<u8>()
         .map_err(|_| FenParseError(format!("Invalid halfmove: {}", halfmove_str)))?;
@@ -106,7 +108,7 @@ fn parse_halfmove(board: &mut Board, halfmove_str: &str) -> Result<(), FenParseE
     Ok(())
 }
 
-fn parse_fullmove(board: &mut Board, fullmove_str: &str) -> Result<(), FenParseError> {
+fn parse_fullmove(board: &mut GameState, fullmove_str: &str) -> Result<(), FenParseError> {
     let fullmove = fullmove_str
         .parse::<u8>()
         .map_err(|_| FenParseError(format!("Invalid fullmove: {}", fullmove_str)))?;
