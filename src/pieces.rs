@@ -1,10 +1,21 @@
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Not};
 use strum_macros::EnumIter;
 
-#[derive(Debug, EnumIter)]
+#[derive(Clone, Copy, Debug, EnumIter)]
 pub enum Color {
     White = 0,
     Black = 1,
+}
+
+impl Not for Color {
+    type Output = Color;
+
+    fn not(self) -> Self::Output {
+        match self {
+            Color::White => Color::Black,
+            Color::Black => Color::White,
+        }
+    }
 }
 
 impl<T> Index<Color> for [T] {
