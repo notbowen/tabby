@@ -75,8 +75,8 @@ impl GameState {
         }
     }
 
-    pub fn debug_board(&mut self) {
-        println!("{:#?}\n", &self);
-        self.print_board();
-    }
+    // pub fn debug_board(&mut self) {
+    //     println!("{:#?}\n", &self);
+    //     self.print_board();
+    // }
 }
