@@ -27,21 +27,28 @@ impl GameState {
 }
 
 fn parse_board_fen(board: &mut GameState, fen: &str) -> Result<(), FenParseError> {
-    let mut idx = 64;
+    // [TODO]: Add integer overflow protection here
+    let mut row = 7;
+    let mut col = 0;
+
     for c in fen.chars() {
-        idx -= 1;
         match c {
-            '1'..='8' => idx -= c as u8 - '1' as u8, // [TODO]: Ensure this is accurate
+            '1'..='8' => col += c as u8 - '1' as u8,
             'A'..='z' => {
                 if let Some((color, piece)) = str_to_colored_piece(c) {
-                    board.set_piece_index(color, piece, idx);
+                    board.set_piece_index(color, piece, row * 8 + col);
                 } else {
                     return Err(FenParseError(format!("Invalid character {}", c)));
                 };
             }
-            '/' => idx += 1,
+            '/' => {
+                row -= 1;
+                col = 0;
+                continue;
+            },
             _ => return Err(FenParseError(format!("Invalid character {}", c))),
         }
+        col += 1
     }
 
     Ok(())
