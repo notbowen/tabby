@@ -45,7 +45,7 @@ fn parse_board_fen(board: &mut GameState, fen: &str) -> Result<(), FenParseError
                 row -= 1;
                 col = 0;
                 continue;
-            },
+            }
             _ => return Err(FenParseError(format!("Invalid character {}", c))),
         }
         col += 1

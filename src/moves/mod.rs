@@ -2,8 +2,8 @@
 
 use crate::state::square::Square;
 
-pub mod movegen;
 pub mod lookup;
+pub mod movegen;
 
 #[derive(Debug)]
 pub struct Move {
