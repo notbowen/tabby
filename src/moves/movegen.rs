@@ -1,5 +1,8 @@
 use crate::{
-    moves::{Move, lookup::KNIGHT_ATTACKS},
+    moves::{
+        Move,
+        lookup::{KING_ATTACKS, KNIGHT_ATTACKS},
+    },
     pieces::Piece,
     state::{GameState, bitboard::Bitboard, square::Square},
 };
@@ -16,6 +19,9 @@ impl MoveGen {
         let mut moves = Vec::with_capacity(256);
 
         self.generate_knights(state, &mut moves);
+        self.generate_kings(state, &mut moves);
+
+        println!("{:#?}", &moves);
 
         moves
     }
@@ -40,7 +46,26 @@ impl MoveGen {
                 })
             }
         }
+    }
 
-        println!("{:#?}", moves);
+    pub fn generate_kings(&self, state: &mut GameState, moves: &mut Vec<Move>) {
+        let mut our_king = state.color_bb[state.current_side] & state.piece_bb[Piece::King];
+        let legal_spaces = !state.color_bb[state.current_side];
+
+        let pos = our_king.pop_bit().unwrap(); // should nvr fail coz every board has a king
+        let attacks = KING_ATTACKS[pos as usize];
+
+        let mut legal_moves = attacks & legal_spaces;
+        while let Some(m) = legal_moves.pop_bit() {
+            moves.push(Move {
+                from: Square::from_index(pos).unwrap(),
+                to: Square::from_index(m).unwrap(),
+                flags: if state.color_bb[!state.current_side].get_bit(m) {
+                    crate::moves::MoveType::Capture
+                } else {
+                    crate::moves::MoveType::Quiet
+                },
+            });
+        }
     }
 }
