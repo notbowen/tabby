@@ -83,3 +83,9 @@ impl Not for Bitboard {
         Bitboard(!self.0)
     }
 }
+
+impl PartialEq<u64> for Bitboard {
+    fn eq(&self, other: &u64) -> bool {
+        self.0 == *other
+    }
+}

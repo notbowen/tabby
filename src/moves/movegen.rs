@@ -110,6 +110,35 @@ impl MoveGen {
             &mut remaining_moves,
             state.current_side,
         );
+
+        if state.en_passant.is_none() {
+            return;
+        }
+
+        // en passant calculation
+        let en_passant_idx = state.en_passant.unwrap().to_index();
+        let en_passant_board = Bitboard(1 << en_passant_idx) & enemy_pieces;
+
+        let mut en_passant_left = captures_left & en_passant_board;
+        let mut en_passant_right = captures_right & en_passant_board;
+
+        if en_passant_left != 0 {
+            let to = en_passant_left.pop_bit().unwrap();
+            moves.push(Move {
+                from: Square::from_index(to - 7).unwrap(),
+                to: Square::from_index(to).unwrap(),
+                flags: MoveType::EnPassant,
+            });
+        }
+
+        if en_passant_right != 0 {
+            let to = en_passant_right.pop_bit().unwrap();
+            moves.push(Move {
+                from: Square::from_index(to - 9).unwrap(),
+                to: Square::from_index(to).unwrap(),
+                flags: MoveType::EnPassant,
+            });
+        }
     }
 
     pub fn generate_black_pawn_moves(&self, state: &mut GameState, moves: &mut Vec<Move>) {
@@ -137,6 +166,35 @@ impl MoveGen {
             &mut remaining_moves,
             state.current_side,
         );
+
+        if state.en_passant.is_none() {
+            return;
+        }
+
+        // en passant calculation
+        let en_passant_idx = state.en_passant.unwrap().to_index();
+        let en_passant_board = Bitboard(1 << en_passant_idx) & enemy_pieces;
+
+        let mut en_passant_left = captures_left & en_passant_board;
+        let mut en_passant_right = captures_right & en_passant_board;
+
+        if en_passant_left != 0 {
+            let to = en_passant_left.pop_bit().unwrap();
+            moves.push(Move {
+                from: Square::from_index(to + 7).unwrap(),
+                to: Square::from_index(to).unwrap(),
+                flags: MoveType::EnPassant,
+            });
+        }
+
+        if en_passant_right != 0 {
+            let to = en_passant_right.pop_bit().unwrap();
+            moves.push(Move {
+                from: Square::from_index(to + 9).unwrap(),
+                to: Square::from_index(to).unwrap(),
+                flags: MoveType::EnPassant,
+            });
+        }
     }
 
     fn process_pawn_bitboards(
