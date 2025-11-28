@@ -92,7 +92,7 @@ impl MoveGen {
         let pushed_pawns = (our_pawns << 8) & empty_squares;
         let double_pushes = ((pushed_pawns & RANK_3) << 8) & empty_squares;
 
-        let enemy_pieces = state.color_bb[!state.current_side] & state.piece_bb[Piece::Pawn];
+        let enemy_pieces = state.color_bb[!state.current_side];
 
         let mut quiet_moves = (pushed_pawns & !RANK_8) | double_pushes;
         let mut captures_left = ((our_pawns & !FILE_A) << 7) & enemy_pieces;
@@ -148,7 +148,7 @@ impl MoveGen {
         let pushed_pawns = (our_pawns >> 8) & empty_squares;
         let double_pushes = ((pushed_pawns & RANK_8) >> 8) & empty_squares;
 
-        let enemy_pieces = state.color_bb[!state.current_side] & state.piece_bb[Piece::Pawn];
+        let enemy_pieces = state.color_bb[!state.current_side];
 
         let mut quiet_moves = (pushed_pawns & !RANK_1) | double_pushes;
         let mut captures_left = ((our_pawns & !FILE_A) >> 7) & enemy_pieces;
@@ -240,7 +240,7 @@ impl MoveGen {
                 MoveType::KnightPromotion,
             ]
             .iter()
-            .map(|f| {
+            .for_each(|f| {
                 moves.push(Move {
                     from: Square::from_index(match side {
                         Color::Black => to + 8,
@@ -265,7 +265,7 @@ impl MoveGen {
                         MoveType::KnightPromotionCapture,
                     ]
                     .iter()
-                    .map(|f| {
+                    .for_each(|f| {
                         moves.push(Move {
                             from: Square::from_index(match side {
                                 Color::Black => to + (7 + (i * 2) as u8),
