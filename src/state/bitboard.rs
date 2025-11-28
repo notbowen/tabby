@@ -1,4 +1,4 @@
-use std::ops::{BitAnd, BitAndAssign, BitOrAssign, Not};
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, Not, Shl, Shr};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Bitboard(pub u64);
@@ -24,6 +24,22 @@ impl Bitboard {
     }
 }
 
+impl Shl<usize> for Bitboard {
+    type Output = Self;
+
+    fn shl(self, rhs: usize) -> Self::Output {
+        Bitboard(self.0 << rhs)
+    }
+}
+
+impl Shr<usize> for Bitboard {
+    type Output = Self;
+
+    fn shr(self, rhs: usize) -> Self::Output {
+        Bitboard(self.0 >> rhs)
+    }
+}
+
 impl BitAnd for Bitboard {
     type Output = Self;
 
@@ -38,9 +54,25 @@ impl BitAndAssign for Bitboard {
     }
 }
 
+impl BitOr for Bitboard {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Bitboard(self.0 | rhs.0)
+    }
+}
+
 impl BitOrAssign for Bitboard {
     fn bitor_assign(&mut self, rhs: Self) {
         self.0 |= rhs.0;
+    }
+}
+
+impl BitXor for Bitboard {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        Bitboard(self.0 ^ rhs.0)
     }
 }
 

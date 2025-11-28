@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use strum_macros::EnumIter;
+
 use crate::state::square::Square;
 
 pub mod lookup;
@@ -12,7 +14,7 @@ pub struct Move {
     flags: MoveType,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, EnumIter)]
 pub enum MoveType {
     Quiet,
     Capture,
@@ -21,4 +23,8 @@ pub enum MoveType {
     RookPromotion,
     BishopPromotion,
     KnightPromotion,
+    QueenPromotionCapture,
+    RookPromotionCapture,
+    BishopPromotionCapture,
+    KnightPromotionCapture,
 }

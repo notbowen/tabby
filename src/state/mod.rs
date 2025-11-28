@@ -38,6 +38,10 @@ impl GameState {
         }
     }
 
+    pub fn get_empty_squares(&self) -> Bitboard {
+        !(self.color_bb[Color::White] | self.color_bb[Color::Black])
+    }
+
     pub fn get_piece_index(&mut self, index: u8) -> Option<(Color, Piece)> {
         let color = if self.color_bb[Color::White].get_bit(index) {
             Color::White

@@ -1,11 +1,19 @@
 use crate::{
     moves::{
-        Move,
+        Move, MoveType,
         lookup::{KING_ATTACKS, KNIGHT_ATTACKS},
     },
-    pieces::Piece,
+    pieces::{Color, Piece},
     state::{GameState, bitboard::Bitboard, square::Square},
 };
+
+const FILE_A: Bitboard = Bitboard(0x0101010101010101);
+const FILE_H: Bitboard = Bitboard(0x8080808080808080);
+
+const RANK_1: Bitboard = Bitboard(0x00000000000000FF);
+const RANK_3: Bitboard = Bitboard(0x0000000000FF0000);
+const RANK_6: Bitboard = Bitboard(0x0000FF0000000000);
+const RANK_8: Bitboard = Bitboard(0xFF00000000000000);
 
 pub struct MoveGen;
 
@@ -20,6 +28,7 @@ impl MoveGen {
 
         self.generate_knights(state, &mut moves);
         self.generate_kings(state, &mut moves);
+        self.generate_pawn_moves(state, &mut moves);
 
         println!("{:#?}", &moves);
 
@@ -67,5 +76,135 @@ impl MoveGen {
                 },
             });
         }
+    }
+
+    pub fn generate_pawn_moves(&self, state: &mut GameState, moves: &mut Vec<Move>) {
+        match state.current_side {
+            Color::White => self.generate_white_pawn_moves(state, moves),
+            Color::Black => self.generate_black_pawn_moves(state, moves),
+        }
+    }
+
+    pub fn generate_white_pawn_moves(&self, state: &mut GameState, moves: &mut Vec<Move>) {
+        let empty_squares = state.get_empty_squares();
+
+        let our_pawns = state.color_bb[state.current_side] & state.piece_bb[Piece::Pawn];
+        let pushed_pawns = (our_pawns << 8) & empty_squares;
+        let double_pushes = ((pushed_pawns & RANK_3) << 8) & empty_squares;
+
+        let enemy_pieces = state.color_bb[!state.current_side] & state.piece_bb[Piece::Pawn];
+        let captures_left = ((our_pawns & !FILE_A) << 7) & enemy_pieces;
+        let captures_right = ((our_pawns & !FILE_H) << 9) & enemy_pieces;
+
+        let all_moves = pushed_pawns | double_pushes | captures_left | captures_right;
+        let mut promotion_moves = (all_moves & RANK_8) & empty_squares;
+        let mut promotion_left_captures = (captures_left & RANK_8) & state.piece_bb[Color::Black];
+        let mut promotion_right_captures = (captures_right & RANK_8) & state.piece_bb[Color::Black];
+        let mut remaining_moves =
+            all_moves ^ promotion_moves ^ promotion_left_captures ^ promotion_right_captures;
+
+        self.process_pawn_bitboards(
+            moves,
+            &mut promotion_moves,
+            &mut [&mut promotion_left_captures, &mut promotion_right_captures],
+            &mut remaining_moves,
+            state.current_side,
+        );
+    }
+
+    pub fn generate_black_pawn_moves(&self, state: &mut GameState, moves: &mut Vec<Move>) {
+        let empty_squares = state.get_empty_squares();
+
+        let our_pawns = state.color_bb[state.current_side] & state.piece_bb[Piece::Pawn];
+        let pushed_pawns = (our_pawns >> 8) & empty_squares;
+        let double_pushes = ((pushed_pawns & RANK_8) >> 8) & empty_squares;
+
+        let enemy_pieces = state.color_bb[!state.current_side] & state.piece_bb[Piece::Pawn];
+        let captures_left = ((our_pawns & !FILE_A) >> 7) & enemy_pieces;
+        let captures_right = ((our_pawns & !FILE_H) >> 9) & enemy_pieces;
+
+        let all_moves = pushed_pawns | double_pushes | captures_left | captures_right;
+        let mut promotion_moves = (all_moves & RANK_1) & empty_squares;
+        let mut promotion_left_captures = (captures_left & RANK_3) & state.piece_bb[Color::White];
+        let mut promotion_right_captures = (captures_right & RANK_3) & state.piece_bb[Color::White];
+        let mut remaining_moves =
+            all_moves ^ promotion_moves ^ promotion_left_captures ^ promotion_right_captures;
+
+        self.process_pawn_bitboards(
+            moves,
+            &mut promotion_moves,
+            &mut [&mut promotion_left_captures, &mut promotion_right_captures],
+            &mut remaining_moves,
+            state.current_side,
+        );
+    }
+
+    fn process_pawn_bitboards(
+        &self,
+        moves: &mut Vec<Move>,
+        promotion_moves: &mut Bitboard,
+        promotion_capture_moves: &mut [&mut Bitboard; 2],
+        remaining_moves: &mut Bitboard,
+        side: Color,
+    ) {
+        while let Some(to) = remaining_moves.pop_bit() {
+            moves.push(Move {
+                from: Square::from_index(match side {
+                    Color::Black => to + 8,
+                    Color::White => to - 8,
+                })
+                .unwrap(),
+                to: Square::from_index(to).unwrap(),
+                flags: MoveType::Quiet,
+            });
+        }
+
+        while let Some(to) = promotion_moves.pop_bit() {
+            [
+                MoveType::RookPromotion,
+                MoveType::QueenPromotion,
+                MoveType::BishopPromotion,
+                MoveType::KnightPromotion,
+            ]
+            .iter()
+            .map(|f| {
+                moves.push(Move {
+                    from: Square::from_index(match side {
+                        Color::Black => to + 8,
+                        Color::White => to - 8,
+                    })
+                    .unwrap(),
+                    to: Square::from_index(to).unwrap(),
+                    flags: f.clone(),
+                })
+            });
+        }
+
+        promotion_capture_moves
+            .iter_mut()
+            .enumerate()
+            .map(|(i, board)| {
+                let mut b = board.clone();
+                while let Some(to) = b.pop_bit() {
+                    [
+                        MoveType::RookPromotionCapture,
+                        MoveType::QueenPromotionCapture,
+                        MoveType::BishopPromotionCapture,
+                        MoveType::KnightPromotionCapture,
+                    ]
+                    .iter()
+                    .map(|f| {
+                        moves.push(Move {
+                            from: Square::from_index(match side {
+                                Color::Black => to + (7 + (i * 2) as u8),
+                                Color::White => to - (7 + (i * 2) as u8),
+                            })
+                            .unwrap(),
+                            to: Square::from_index(to).unwrap(),
+                            flags: f.clone(),
+                        })
+                    });
+                }
+            });
     }
 }
